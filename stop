@@ -1,0 +1,51 @@
+#! /bin/bash
+
+# Script: stop
+# Author: Anirudh Kamble
+# Description: This scipt kills the process id associated with the command name provided.
+# Usage: "stop <command>"
+
+function showHelp(){
+	echo
+	echo "Usage: stop [-t] cmd"
+	echo "Options:"
+	echo "-t: TERMINATE Signal. Default KILL."
+}
+
+function killCommand(){
+	cmdExists=$(which $cmd)
+	if [[ $cmdExists ]]
+	then
+		pids=`pidof $cmd`
+	else
+		pids=$(ps -ef | grep $cmd | awk 'NR<2{print $2}')
+	fi
+
+	if [[ $pids ]]
+	then
+		kill -$sig $pids
+		echo "KILLED $cmd"
+	else
+		echo "No process running for command '$cmd'"
+	fi
+}
+
+
+sig=KILL
+pids=''
+if [ $# == 2 ]
+then
+	if [ $1 == "-t" ]
+	then
+		sig=TERM
+	else
+		echo "Invalid option provided: '$1'"
+		showHelp
+		exit 1
+	fi
+	cmd=$2
+else
+	cmd=$1
+fi
+
+killCommand
